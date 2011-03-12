@@ -1086,7 +1086,7 @@ def resolve(feed, pid):
         times.append(['media 2',time.clock()])    
         url = media.url
         times.append(['media.url',time.clock()]) 
-        logging.info('watching %s: url=%s' % title,url)
+        logging.info('watching %s: url=%s' % (title,url))
         times.append(['logging',time.clock()])
 
         listitem = xbmcgui.ListItem(title, path=url)
