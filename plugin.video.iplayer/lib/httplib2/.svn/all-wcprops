@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/79/trunk/plugin.video.iplayer/lib/httplib2
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/76/trunk/plugin.video.iplayer/lib/httplib2/__init__.py
+END
+socks.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/79/trunk/plugin.video.iplayer/lib/httplib2/socks.py
+END
+iri2uri.py
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/httplib2/iri2uri.py
+END

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/86/trunk/plugin.video.iplayer/lib
+END
+live_tv.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/82/trunk/plugin.video.iplayer/lib/live_tv.py
+END
+listparser.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/listparser.py
+END
+addoncompat.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/addoncompat.py
+END
+iplayer_search.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/iplayer_search.py
+END
+stations.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/stations.py
+END
+iplayer2.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/86/trunk/plugin.video.iplayer/lib/iplayer2.py
+END

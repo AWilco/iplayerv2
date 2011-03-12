@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree
+END
+SgmlopXMLTreeBuilder.py
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/SgmlopXMLTreeBuilder.py
+END
+ElementTree.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/ElementTree.py
+END
+TidyTools.py
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/TidyTools.py
+END
+HTMLTreeBuilder.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/HTMLTreeBuilder.py
+END
+ElementInclude.py
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/ElementInclude.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/__init__.py
+END
+ElementIron.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/ElementIron.py
+END
+SimpleXMLTreeBuilder.py
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/SimpleXMLTreeBuilder.py
+END
+TidyHTMLTreeBuilder.py
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/TidyHTMLTreeBuilder.py
+END
+ElementPath.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/ElementPath.py
+END
+SimpleXMLWriter.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/SimpleXMLWriter.py
+END
+XMLTreeBuilder.py
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/66/trunk/plugin.video.iplayer/lib/elementtree/XMLTreeBuilder.py
+END
