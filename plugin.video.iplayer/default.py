@@ -138,6 +138,7 @@ def read_url():
     label        = args.get('label', [None])[0]
     deletesearch = args.get('deletesearch', [None])[0]
     radio        = args.get('radio', [None])[0]
+    resolveURL   = args.get('resolveURL', [None])[0]
 
     feed = None
     if feed_channel:
@@ -150,7 +151,7 @@ def read_url():
         if   section == '1': tvradio = 'tv'
         elif section == '2': tvradio = 'radio'
 
-    return (feed, listing, pid, tvradio, category, series, url, label, deletesearch, radio)
+    return (feed, listing, pid, tvradio, category, series, url, label, deletesearch, radio, resolveURL)
     
 def list_feeds(feeds, tvradio='tv', radio=None):
     xbmcplugin.addSortMethod(handle=PLUGIN_HANDLE, sortMethod=xbmcplugin.SORT_METHOD_TRACKNUM )   
@@ -995,6 +996,168 @@ def watch(feed, pid, showDialog):
             logging.info('Took %2.2f sec for %s' % (t[1] - pt, t[0]))
             pt = t[1]
 
+def resolve(feed, pid):
+
+    times = []
+    times.append(['start',time.clock()])
+
+    item      = get_item(pid)
+    times.append(['get_item',time.clock()])
+    thumbnail = item.programme.thumbnail
+    title     = item.programme.title
+    summary   = item.programme.summary
+    updated   = item.programme.updated
+    channel   = None
+    thumbfile = None
+    if feed and feed.name:
+        channel = feed.name
+    times.append(['setup variables',time.clock()])        
+    logging.info('watching channel=%s pid=%s' % (channel, pid))
+    times.append(['logging',time.clock()])
+    logging.info('thumb =%s   summary=%s' % (thumbnail, summary))
+    times.append(['logging',time.clock()]) 
+    times.append(['get_setting_subtitles',time.clock()])
+
+    if thumbnail: 
+        # attempt to use the existing thumbnail file
+        thumbcache = xbmc.getCacheThumbName( sys.argv[ 0 ] + sys.argv[ 2 ] )
+        thumbfile  = os.path.join( xbmc.translatePath( "special://profile" ), "Thumbnails", "Video", thumbcache[ 0 ], thumbcache )
+        logging.info('Reusing existing thumbfile =%s for url %s%s' % (thumbfile, sys.argv[ 0 ], sys.argv[ 2 ]))
+        
+    if thumbnail and not os.path.isfile(thumbfile):
+        # thumbnail wasn't available locally so download    
+        try:
+            # The thumbnail needs to accessed via the local filesystem
+            # for "Media Info" to display it when playing a video
+            if showDialog:
+                pDialog.update(20, 'Fetching thumbnail')
+                if pDialog.iscanceled(): raise 
+                times.append(['update dialog',time.clock()])
+            iplayer.httpretrieve(thumbnail, thumbfile)
+            times.append(['retrieve thumbnail',time.clock()])
+        except:
+            pass
+
+    if item.is_tv:
+        # TV Stream
+        iconimage = 'DefaultVideo.png'
+
+        pref = get_setting_videostream()        
+        times.append(['get_setting_videostream',time.clock()])
+        opref = pref
+        
+        media = item.get_media_for(pref)
+        times.append(['fetch media',time.clock()])
+
+        # fall down to find a supported stream. 
+        streams = ['h264 3200', 'h264 1500', 'h264 800', 'h264 480', 'h264 400']
+
+        for i, stream in enumerate(streams):
+          if pref == stream:
+              break
+
+        while not media and i < len(streams)-1:
+            i += 1
+            logging.info('Stream %s not available, falling back to flash %s stream' % (pref, streams[i]) )
+            pref = streams[i]
+            media = item.get_media_for(pref)
+
+        times.append(['media 1',time.clock()])
+
+        streams.reverse();
+        # problem - no media found for default or lower
+        if not media:
+            # find the first available stream in ascending order
+            for apref in streams:
+                media = item.get_media_for(apref)
+                if media:
+                    pref=apref
+                    break
+
+			# Default to usable bitrate, otherwise error
+            # A potentially usable stream was found (higher bitrate than the default) offer it to the user
+			
+            if  not media:
+                # Nothing usable was found
+                d = xbmcgui.Dialog()
+                d.ok('Stream Error', 'Can\'t locate any usable TV streams.')            
+                return False
+				
+        times.append(['media 2',time.clock()])    
+        url = media.url
+        times.append(['media.url',time.clock()]) 
+        logging.info('watching %s: url=%s' % title,url)
+        times.append(['logging',time.clock()])
+
+        listitem = xbmcgui.ListItem(title, path=url)
+        times.append(['create listitem',time.clock()])
+        #listitem.setIconImage(iconimage)
+        listitem.setInfo('video', {
+                                   "TVShowTitle": title,
+                                   'Plot': summary + ' ' + updated,
+                                   'PlotOutline': summary,
+                                   "Date": updated,})
+        
+    else:
+        # Radio stream    
+
+        #Radio streams don't work at the minute, so return
+        return
+        #Will use this code when the bug in xbmc is fixed
+        
+        pref = get_setting_audiostream()
+        media = item.get_media_for(pref)
+        if not media:
+            # fallback to mp3 
+            logging.info('Steam %s not available, trying mp3 stream' % pref)
+            pref = 'mp3'
+            media = item.get_media_for(pref)
+        if not media:
+            # fallback to wma 
+            logging.info('Steam %s not available, trying wma stream' % pref)
+            pref = 'wma'
+            media = item.get_media_for(pref)            
+        if not media:
+            # fallback to real 
+            logging.info('Steam %s not available, trying real stream' % pref)
+            pref = 'real'
+            media = item.get_media_for(pref)
+        if not media:            
+            d = xbmcgui.Dialog()
+            d.ok('Stream Error', 'Error: can\'t locate radio stream')            
+            return False
+        if pref == 'real':
+            # fetch the rtsp link from the .ram file
+            url = iplayer.httpget(media.url)
+        else :
+            # else use the direct link
+            url = media.url
+            
+        logging.info('Listening to url=%s' % url)
+
+        listitem = xbmcgui.ListItem(title, path=url)
+        listitem.setIconImage('defaultAudio.png')
+
+    logging.info('Playing preference %s' % pref)
+    times.append(['logging.info',time.clock()])
+    times.append(['listitem.setproperty x 3',time.clock()])
+
+    if thumbfile: 
+        listitem.setIconImage(thumbfile)
+        times.append(['listitem.setIconImage(thumbfile)',time.clock()])
+        listitem.setThumbnailImage(thumbfile)
+        times.append(['listitem.setThumbnailImage(thumbfile)',time.clock()])
+    
+    del item
+    del media
+    
+    xbmcplugin.setResolvedUrl(PLUGIN_HANDLE, True, listitem)
+    
+    if addoncompat.get_setting('enhanceddebug') == 'true':
+        pt = times[0][1]
+        for t in times:
+            logging.info('Took %2.2f sec for %s' % (t[1] - pt, t[0]))
+            pt = t[1]
 
 def listen_live(label='', url=None):
     
@@ -1024,6 +1187,26 @@ def listen_live(label='', url=None):
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
 
     player.play(play)
+
+def resolve_live(label='', url=None):
+    
+    if not url:
+        return
+    
+    txt = iplayer.httpget(url)
+    
+    # some of the the urls passed in are .asx. These are text files with multiple mss stream hrefs
+    stream = re.compile('href\="(mms.*?)"', re.IGNORECASE)
+    match  = stream.search(txt) 
+    stream_url = None
+    if match:
+        stream_url = match.group(1)
+    else:
+        # pass it to xbmc and see if it is directly supported 
+        stream_url = url
+        
+    listitem = xbmcgui.ListItem(label=label, label2=label, path=stream_url)
+    xbmcplugin.setResolvedUrl(PLUGIN_HANDLE, True, listitem)
 
 
 logging.info("IPlayer: version: %s" % __version__)
@@ -1075,8 +1258,8 @@ if __name__ == "__main__":
         if addoncompat.get_setting('progcount') == 'false':  progcount = False   
       
         # get current state parameters
-        (feed, listing, pid, tvradio, category, series, url, label, deletesearch, radio) = read_url()
-        logging.info( (feed, listing, pid, tvradio, category, series, url, label, deletesearch, radio) )
+        (feed, listing, pid, tvradio, category, series, url, label, deletesearch, radio, resolveURL) = read_url()
+        logging.info( (feed, listing, pid, tvradio, category, series, url, label, deletesearch, radio, resolveURL) )
         
         # update feed category
         if feed and category:
@@ -1086,11 +1269,18 @@ if __name__ == "__main__":
         if pid:
             showDialog = addoncompat.get_setting('displaydialog') == 'true'
             if not label:
-                watch(feed, pid, showDialog)
+            
+                if resolveURL:
+                    resolve(feed, pid)
+                else:
+                    watch(feed, pid, showDialog)
             else:
                 pref = get_setting_videostream()
                 bitrate = pref.split(' ')[1]
-                live_tv.play_stream(label, bitrate, showDialog)
+                if resolveURL:
+                    live_tv.resolve_stream(label, bitrate, PLUGIN_HANDLE)
+                else:
+                    live_tv.play_stream(label, bitrate, showDialog)    
         elif url:
             listen_live(label, url)
         elif deletesearch:

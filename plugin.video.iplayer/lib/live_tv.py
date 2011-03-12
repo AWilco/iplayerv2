@@ -125,6 +125,35 @@ def play_stream(channel, bitrate, showDialog):
     player.play(play)
     if showDialog: pDialog.close()
     
+def resolve_stream(channel, bitrate, PLUGIN_HANDLE):
+    bitrate = int(bitrate)
+    # check to see if bbcthree/cbbc or bbcfour/cbeebies is on the air?    
+    if channel == 'bbc_three' or channel == 'bbc_four' or channel == 'cbeebies' or channel == 'cbbc':
+        surl = 'http://www.bbc.co.uk/iplayer/tv/'+channel
+        cstr = httpget(surl)
+        off_air_message = re.compile('<h2 class="off-air">.+?</span>(.+?)</a></h2>').findall(cstr)
+        if off_air_message:
+            pDialog = xbmcgui.Dialog()
+            pDialog.ok('IPlayer', 'Channel is currently Off Air')
+            return False
+
+    provider = get_provider()
+    
+    url = fetch_stream_info(channel, bitrate, provider)
+
+    if url == "":
+        Dialog = xbmcgui.Dialog()
+        pDialog.ok('IPlayer', "Sorry, stream is currently unavailable")
+        return False
+		
+    # build listitem to display whilst playing
+    (sort, stream_id, label, thumb) = live_tv_channels[channel]
+    listitem = xbmcgui.ListItem(label = label + ' - Live',path=url)
+    listitem.setIconImage('defaultVideo.png')
+    listitem.setThumbnailImage(os.path.join(get_thumb_dir(), thumb))
+
+    xbmcplugin.setResolvedUrl(PLUGIN_HANDLE, True, listitem)
+     
 def make_url(channel=None):
     base = sys.argv[0]
     d = {}
