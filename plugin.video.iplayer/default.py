@@ -1001,6 +1001,7 @@ def resolve(feed, pid):
     times = []
     times.append(['start',time.clock()])
 
+    subtitles_file = None 
     item      = get_item(pid)
     times.append(['get_item',time.clock()])
     thumbnail = item.programme.thumbnail
@@ -1016,6 +1017,7 @@ def resolve(feed, pid):
     times.append(['logging',time.clock()])
     logging.info('thumb =%s   summary=%s' % (thumbnail, summary))
     times.append(['logging',time.clock()]) 
+    subtitles = get_setting_subtitles()
     times.append(['get_setting_subtitles',time.clock()])
 
     if thumbnail: 
@@ -1089,6 +1091,13 @@ def resolve(feed, pid):
         logging.info('watching %s: url=%s' % (title,url))
         times.append(['logging',time.clock()])
 
+        if subtitles:
+            subtitles_media = item.get_media_for('captions')
+            times.append(['subtitles_media',time.clock()])
+            if subtitles_media:
+                subtitles_file = download_subtitles(subtitles_media.url)
+                times.append(['subtitles download',time.clock()])
+                
         listitem = xbmcgui.ListItem(title, path=url)
         times.append(['create listitem',time.clock()])
         #listitem.setIconImage(iconimage)
@@ -1148,10 +1157,15 @@ def resolve(feed, pid):
         listitem.setThumbnailImage(thumbfile)
         times.append(['listitem.setThumbnailImage(thumbfile)',time.clock()])
     
+    if subtitles == 'autoplay' and subtitles_file:
+        print 'Setting Subtitles to %s' % subtitles_file
+        listitem.setProperty('upnp:subtitle:1',subtitles_file)
+        times.append(['player.setSubtitles',time.clock()])
+    
     del item
     del media
     
-    xbmcplugin.setResolvedUrl(PLUGIN_HANDLE, True, listitem)
+    xbmcplugin.setResolvedUrl(PLUGIN_HANDLE, succeeded=True, listitem=listitem)
     
     if addoncompat.get_setting('enhanceddebug') == 'true':
         pt = times[0][1]
